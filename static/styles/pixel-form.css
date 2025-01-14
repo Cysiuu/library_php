@@ -1,0 +1,150 @@
+/* Pixel Form Styles */
+@import "https://fonts.googleapis.com/css?family=Press%20Start%202P";
+@import url('https://fonts.googleapis.com/css2?family=Jersey+20&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Jersey+10&display=swap');
+
+.pixel-form {
+    background-color: #222211;
+    padding: 2rem;
+    border: 4px solid #fff090;
+    box-shadow: 0 0 0 4px #222211, 
+                0 0 0 8px #4FAF44;
+    max-width: 800px;
+    margin: 2rem auto;
+    image-rendering: pixelated;
+}
+
+.pixel-form label {
+    font-family: "Jersey 10", serif !important;
+    color: #fff090;
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem !important;
+    text-shadow: 2px 2px #000;
+}
+
+.pixel-form .form-control {
+    background-color: #333322;
+    border: 2px solid #fff090;
+    color: #fff090;
+    font-family: "Jersey 10", serif;
+    padding: 0.75rem;
+    transition: all 0.3s;
+    image-rendering: pixelated;
+    font-size: 1.2rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.pixel-form .form-control:focus {
+    background-color: #444433;
+    border-color: #4FAF44;
+    box-shadow: 0 0 0 0.25rem rgba(79, 175, 68, 0.25);
+    outline: none;
+}
+
+.pixel-form .btn {
+    font-family: "Press Start 2P", cursive;
+    font-size: 1rem;
+    padding: 1rem 2rem;
+    background-color: #4FAF44;
+    border: none;
+    color: #fff090;
+    position: relative;
+    transition: all 0.3s;
+    image-rendering: pixelated;
+}
+
+.pixel-form .btn::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(to right, 
+        transparent 0%, 
+        #4FAF44 50%, 
+        transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.pixel-form .btn:hover {
+    background-color: #3d8c35;
+    transform: translateY(-2px);
+}
+
+.pixel-form .btn:hover::after {
+    opacity: 1;
+}
+
+.pixel-form .form-text {
+    color: #fff090;
+    font-family: "Jersey 10", serif;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+.pixel-form .invalid-feedback {
+    color: #ff6b6b;
+    font-family: "Press Start 2P", cursive;
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .pixel-form {
+        padding: 1rem;
+        margin: 1rem;
+    }
+    
+    .pixel-form .btn {
+        width: 100%;
+        font-size: 0.9rem;
+        padding: 0.75rem;
+    }
+    
+    .pixel-form .form-label {
+        font-size: 1rem;
+    }
+}
+
+/* Custom Select Styling */
+.pixel-form .form-select {
+    background-color: #333322;
+    border: 2px solid #fff090;
+    color: #fff090;
+    font-family: "Jersey 10", serif;
+    padding: 0.75rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpolygon points='0,0 8,0 4,8' fill='%23fff090'/%3E%3C/svg%3E");
+    background-size: 8px;
+    appearance: none;
+}
+
+/* Custom Checkbox Styling */
+.pixel-form .form-check-input {
+    width: 1.5em;
+    height: 1.5em;
+    background-color: #333322;
+    border: 2px solid #fff090;
+}
+
+.pixel-form .form-check-input:checked {
+    background-color: #4FAF44;
+    border-color: #4FAF44;
+}
+
+.pixel-form .form-check-label {
+    color: #fff090;
+    font-family: "Jersey 10", serif;
+    padding-left: 0.5rem;
+}
+
+/* Input Group Styling */
+.pixel-form .input-group-text {
+    background-color: #4FAF44;
+    border: 2px solid #fff090;
+    color: #fff090;
+    font-family: "Jersey 10", serif;
+}
