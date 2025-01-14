@@ -9,6 +9,10 @@ if (!$db) {
 
 $query_miasta = "SELECT id_miasta, miasto FROM miasta ORDER BY miasto";
 $result_miasta = mysqli_query($db, $query_miasta);
+
+// Fetch existing client IDs
+$query_get_klient_id = "SELECT idklient, CONCAT(imie, ' ', nazwisko) as full_name FROM klient ORDER BY idklient";
+$result_get_klient_id = mysqli_query($db, $query_get_klient_id);
 ?>
 
 <head>
@@ -91,6 +95,22 @@ $result_miasta = mysqli_query($db, $query_miasta);
 
         <form id="clientForm" class="pixel-form" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST">
 
+
+            <div class="form-group">
+                <label for="klient_id">Wybierz klienta:</label>
+                <select class="form-control" id="klient_id" name="klient_id" required>
+                    <option value="">Wybierz klienta</option>
+                    <?php
+                    if (mysqli_num_rows($result_get_klient_id) > 0) {
+                        while ($row = mysqli_fetch_assoc($result_get_klient_id)) {
+                            echo "<option value='" . htmlspecialchars($row['idklient']) . "'>" .
+                                htmlspecialchars($row['idklient'] . ' - ' . $row['full_name']) . "</option>";
+                        }
+                    }
+                    ?>
+                </select>
+            </div>
+
             <div class="form-section">
                 <h2>Dane osobowe</h2>
                 <div class="form-group">
@@ -114,6 +134,7 @@ $result_miasta = mysqli_query($db, $query_miasta);
                     <select class="form-control" id="miasto" name="miasto" required>
                         <option value="">Wybierz miasto</option>
                         <?php
+                        mysqli_data_seek($result_miasta, 0); // Reset the result pointer
                         if (mysqli_num_rows($result_miasta) > 0) {
                             while ($row = mysqli_fetch_assoc($result_miasta)) {
                                 echo "<option value='" . htmlspecialchars($row['id_miasta']) . "'>" .
@@ -133,7 +154,6 @@ $result_miasta = mysqli_query($db, $query_miasta);
                 </div>
             </div>
 
-
             <div class="checkbox-group">
                 <label>
                     <input type="checkbox" id="isClubMember" name="isClubMember">
@@ -141,11 +161,12 @@ $result_miasta = mysqli_query($db, $query_miasta);
                 </label>
             </div>
 
-            <button type="submit" class="btn btn-primary mt-3">Dodaj klienta</button>
+            <button type="submit" class="btn btn-primary mt-3">Aktualizuj klienta</button>
         </form>
 
         <?php
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
+            $klient_id = $_POST['klient_id'];
             $imie = $_POST['imie'];
             $nazwisko = $_POST['nazwisko'];
             $telefon = $_POST['telefon'];
@@ -153,21 +174,34 @@ $result_miasta = mysqli_query($db, $query_miasta);
             $nr_domu = $_POST['nr_domu'];
             $nr_mieszkania = $_POST['nr_mieszkania'] ?: NULL;
 
+            // Handle loyalty ID update
             if (isset($_POST['isClubMember'])) {
-                $query_max_id = "SELECT MAX(id_lojalnosciowe) as max_id FROM klient WHERE id_lojalnosciowe IS NOT NULL";
-                $result_max_id = mysqli_query($db, $query_max_id);
-                $row = mysqli_fetch_assoc($result_max_id);
-                $id_lojalnosciowe = $row['max_id'] + 1;
+                // Check if client already has a loyalty ID
+                $check_loyalty = "SELECT id_lojalnosciowe FROM klient WHERE id_klient = $klient_id";
+                $result_loyalty = mysqli_query($db, $check_loyalty);
+                $row = mysqli_fetch_assoc($result_loyalty);
+
+                if (!$row['id_lojalnosciowe']) {
+                    // If client doesn't have a loyalty ID, assign a new one
+                    $query_max_id = "SELECT MAX(id_lojalnosciowe) as max_id FROM klient WHERE id_lojalnosciowe IS NOT NULL";
+                    $result_max_id = mysqli_query($db, $query_max_id);
+                    $row = mysqli_fetch_assoc($result_max_id);
+                    $id_lojalnosciowe = $row['max_id'] + 1;
+                }
             } else {
                 $id_lojalnosciowe = "NULL";
             }
 
-            $data_rejestracji = date('Y-m-d');
-
-            $sql = "INSERT INTO klient (imie, nazwisko, telefon, id_miasta, nr_domu, nr_mieszkania, id_lojalnosciowe, data_rejestracji) 
-            VALUES ('$imie', '$nazwisko', '$telefon', $id_miasta, '$nr_domu', " .
-                ($nr_mieszkania ? "'$nr_mieszkania'" : "NULL") . ", " .
-                $id_lojalnosciowe . ", '$data_rejestracji')";
+            // Update query
+            $sql = "UPDATE klient SET 
+                    imie = '$imie', 
+                    nazwisko = '$nazwisko', 
+                    telefon = '$telefon', 
+                    id_miasta = $id_miasta, 
+                    nr_domu = '$nr_domu', 
+                    nr_mieszkania = " . ($nr_mieszkania ? "'$nr_mieszkania'" : "NULL") . ", 
+                    id_lojalnosciowe = " . $id_lojalnosciowe . "
+                    WHERE idklient = $klient_id";
 
             if (mysqli_query($db, $sql)) {
                 header("Location: " . $_SERVER['PHP_SELF'] . "?success=1");
