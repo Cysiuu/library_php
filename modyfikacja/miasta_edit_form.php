@@ -1,8 +1,23 @@
 <!DOCTYPE html>
 <html lang="pl">
 
+<?php
+require_once '../config.php';
+if (!$db) {
+    die("Błąd połączenia: " . mysqli_connect_error());
+}
+
+// Modified query to get unique cities with their postal codes as a concatenated list
+$query_miasta = "SELECT m.id_miasta, m.miasto, 
+                GROUP_CONCAT(k.kod_pocztowy ORDER BY k.kod_pocztowy SEPARATOR ', ') as kody_pocztowe
+                FROM miasta m 
+                LEFT JOIN kody_pocztowe k ON m.id_miasta = k.id_miasta 
+                GROUP BY m.id_miasta, m.miasto
+                ORDER BY m.miasto";
+$result_miasta = mysqli_query($db, $query_miasta);
+?>
 <head>
-    <title>Dodaj miasto</title>
+    <title>Edytuj miasto</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
@@ -76,11 +91,28 @@
 
 <div class="container-fluid d-flex align-items-center justify-content-center">
     <div class="container form-container">
-        <h1 class="display-3 mb-4">Wprowadzanie danych miasta</h1>
+        <h1 class="display-3 mb-4">Modyfikowanie danych miasta</h1>
 
         <form id="cityForm" class="pixel-form" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST">
 
             <div class="form-section">
+                <div class="form-group">
+                    <label for="select_miasto">Wybierz miasto:</label>
+                    <select class="form-control" id="select_miasto" name="id_miasta" required>
+                        <option value="">Wybierz miasto</option>
+                        <?php
+                        if (mysqli_num_rows($result_miasta) > 0) {
+                            while ($row = mysqli_fetch_assoc($result_miasta)) {
+                                echo "<option value='" . htmlspecialchars($row['id_miasta']) . "' 
+                                        data-kod='" . htmlspecialchars($row['kod_pocztowy']) . "'
+                                        data-miasto='" . htmlspecialchars($row['miasto']) . "'>" .
+                                    htmlspecialchars($row['miasto']) . "</option>";
+                            }
+                        }
+                        ?>
+                    </select>
+                </div>
+
                 <div class="form-group">
                     <label for="kod_pocztowy">Kod Pocztowy:</label>
                     <input type="text" class="form-control" id="kod_pocztowy" name="kod_pocztowy" required>
@@ -89,28 +121,41 @@
                     <label for="miasto">Miasto:</label>
                     <input type="text" class="form-control" id="miasto" name="miasto" required>
                 </div>
-
             </div>
 
-            <button type="submit" class="btn btn-primary mt-3">Dodaj miasto</button>
+            <button type="submit" class="btn btn-primary mt-3">Aktualizuj miasto</button>
         </form>
 
         <?php
-        require_once '../config.php';
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
+            $id_miasta = mysqli_real_escape_string($db, $_POST['id_miasta']);
             $kod_pocztowy = mysqli_real_escape_string($db, $_POST['kod_pocztowy']);
             $miasto = mysqli_real_escape_string($db, $_POST['miasto']);
 
-            $insert_city = "INSERT INTO miasta(miasto) VALUES ('$miasto')";
-            if (!mysqli_query($db, $insert_city)) {
-                die("Błąd podczas dodawania miasta: " . mysqli_error($db));
+            // Update city name
+            $update_city = "UPDATE miasta SET miasto = '$miasto' WHERE id_miasta = '$id_miasta'";
+            if (!mysqli_query($db, $update_city)) {
+                die("Błąd podczas aktualizacji miasta: " . mysqli_error($db));
             }
 
-            $city_id = mysqli_insert_id($db);
+            // Check if postal code exists for this city
+            $check_postal = "SELECT * FROM kody_pocztowe WHERE id_miasta = '$id_miasta'";
+            $result_postal = mysqli_query($db, $check_postal);
 
-            $insert_postal_code = "INSERT INTO kody_pocztowe(kod_pocztowy, id_miasta) VALUES ('$kod_pocztowy', '$city_id')";
-            if (!mysqli_query($db, $insert_postal_code)) {
-                die("Błąd podczas dodawania kodu pocztowego: " . mysqli_error($db));
+            if (mysqli_num_rows($result_postal) > 0) {
+                // Update existing postal code
+                $update_postal = "UPDATE kody_pocztowe SET kod_pocztowy = '$kod_pocztowy' 
+                                    WHERE id_miasta = '$id_miasta'";
+                if (!mysqli_query($db, $update_postal)) {
+                    die("Błąd podczas aktualizacji kodu pocztowego: " . mysqli_error($db));
+                }
+            } else {
+                // Insert new postal code
+                $insert_postal = "INSERT INTO kody_pocztowe (kod_pocztowy, id_miasta) 
+                                    VALUES ('$kod_pocztowy', '$id_miasta')";
+                if (!mysqli_query($db, $insert_postal)) {
+                    die("Błąd podczas dodawania kodu pocztowego: " . mysqli_error($db));
+                }
             }
 
             mysqli_close($db);
