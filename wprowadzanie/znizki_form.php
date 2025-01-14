@@ -76,29 +76,29 @@
 
 <div class="container-fluid d-flex align-items-center justify-content-center">
     <div class="container form-container">
-        <h1 class="display-3 mb-4">Dodawanie nowej opłaty</h1>
+        <h1 class="display-3 mb-4">Dodaj nową zniżkę</h1>
 
 
         <form id="discountForm" class="pixel-form" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST">
             <div class="form-section">
                 <div class="form-group">
-                    <label for="wielkosc_oplaty">Wielkość opłaty</label>
-                    <input type="text" class="form-control" id="wielkosc_oplaty" name="wielkosc_oplaty" required>
+                    <label for="wielkosc_znizki">Wielkość zniżki</label>
+                    <input type="number" class="form-control" id="wielkosc_znizki" name="wielkosc_znizki" required>
                 </div>
-                <button type="submit" class="btn btn-primary mt-3">Dodaj opłatę</button>
+                <button type="submit" class="btn btn-primary mt-3">Dodaj zniżkę</button>
         </form>
 
         <?php
         require_once '../config.php';
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
-            $wielkosc_oplaty = $_POST['wielkosc_oplaty'];
+            $wielkosc_znizki = $_POST['wielkosc_znizki'];
 
-            if(!is_numeric($wielkosc_oplaty)) {
-                $wielkosc_oplaty = 0;
+            if(!is_numeric($wielkosc_znizki)) {
+                $wielkosc_znizki = 0;
             }
 
-            $sql = "INSERT INTO oplaty_miesieczne (wielkosc_oplaty) 
-                        VALUES ('$wielkosc_oplaty')";
+            $sql = "INSERT INTO znizki (wielkosc_znizki) 
+                        VALUES ('$wielkosc_znizki')";
 
             if (mysqli_query($db, $sql)) {
                 header("Location: " . $_SERVER['PHP_SELF'] . "?success=1");
