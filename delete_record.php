@@ -179,7 +179,6 @@ try {
     ]);
 
 } catch (Exception $e) {
-    // W przypadku błędu, wycofaj transakcję
     if (isset($db)) {
         mysqli_rollback($db);
     }
