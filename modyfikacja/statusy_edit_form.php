@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="pl">
 
+<?php
+require_once '../config.php';
+$query_statusy = "SELECT id_statusu, nazwa_statusu FROM statusy_zamowien ORDER BY nazwa_statusu ASC";
+$result_statusy = mysqli_query($db, $query_statusy);
+?>
+
+
 <head>
     <title>Dodaj nazwę statusu</title>
 
@@ -76,25 +83,36 @@
 
 <div class="container-fluid d-flex align-items-center justify-content-center">
     <div class="container form-container">
-        <h1 class="display-3 mb-4">Dodawanie nowego statusu</h1>
+        <h1 class="display-3 mb-4">Modyfikacja statusu</h1>
 
-
-        <form id="autorForm" class="pixel-form" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST">
+        <form class="pixel-form" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST">
             <div class="form-section">
                 <div class="form-group">
-                    <label for="status">Nazwa statusu</label>
-                    <input type="text" class="form-control" id="status" name="status" required>
+                    <label for="select_status">Wybierz status</label>
+                    <select class="form-control" id="select_status" name="id_statusu" required>
+                        <option value="">Wybierz status</option>
+                        <?php while ($status = mysqli_fetch_assoc($result_statusy)): ?>
+                            <option value="<?php echo $status['id_statusu']; ?>">
+                                <?php echo $status['nazwa_statusu']; ?>
+                            </option>
+                        <?php endwhile; ?>
+                    </select>
                 </div>
-                <button type="submit" class="btn btn-primary mt-3">Dodaj status</button>
+
+                <div class="form-group">
+                    <label for="status">Nowa nazwa statusu</label>
+                    <input type="text" class="form-control" id="status" name="nazwa_statusu" required>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">Modyfikuj status</button>
+            </div>
         </form>
 
         <?php
-        require_once '../config.php';
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
-            $status = mysqli_real_escape_string($db, $_POST['status']);
+            $id_statusu = mysqli_real_escape_string($db, $_POST['id_statusu']);
+            $nazwa_statusu = mysqli_real_escape_string($db, $_POST['nazwa_statusu']);
 
-            $sql = "INSERT INTO statusy_zamowien (nazwa_statusu) 
-                        VALUES ('$status')";
+            $sql = "UPDATE statusy_zamowien SET nazwa_statusu = '$nazwa_statusu' WHERE id_statusu = $id_statusu";
 
             if (mysqli_query($db, $sql)) {
                 header("Location: " . $_SERVER['PHP_SELF'] . "?success=1");
@@ -102,12 +120,11 @@
             } else {
                 echo "<div class='alert alert-danger'>Błąd: " . mysqli_error($db) . "</div>";
             }
-
-            mysqli_close($db);
         }
         ?>
     </div>
 </div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
