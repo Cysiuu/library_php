@@ -1,8 +1,16 @@
 <!DOCTYPE html>
 <html lang="pl">
 
+
+<?php
+require_once '../config.php';
+
+$query_kategorie = "SELECT * FROM kategorie";
+$result_kategorie = mysqli_query($db, $query_kategorie);
+?>
+
 <head>
-    <title>Dodaj miasto</title>
+    <title>Modyfikacja kategorii</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
@@ -76,27 +84,40 @@
 
 <div class="container-fluid d-flex align-items-center justify-content-center">
     <div class="container form-container">
-        <h1 class="display-3 mb-4">Dodawanie nowej kategorii</h1>
+        <h1 class="display-3 mb-4">Modyfikacja kategorii</h1>
 
-
-        <form id="autorForm" class="pixel-form" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST">
+        <form id="kategoriaForm" class="pixel-form" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST">
             <div class="form-section">
                 <div class="form-group">
-                    <label for="imie_autora">Nazwa kategorii</label>
+                    <label for="select_kategoria">Wybierz kategorię</label>
+                    <select class="form-control" id="select_kategoria" name="id_kategorii" required>
+                        <option value="">Wybierz kategorię</option>
+                        <?php while ($kategoria = mysqli_fetch_assoc($result_kategorie)): ?>
+                            <option value="<?php echo htmlspecialchars($kategoria['id_kategorii']); ?>">
+                                <?php echo htmlspecialchars($kategoria['nazwa_kategorii']); ?>
+                            </option>
+                        <?php endwhile; ?>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="form-group">
+                    <label for="nazwa_kategorii">Nazwa kategorii</label>
                     <input type="text" class="form-control" id="nazwa_kategorii" name="nazwa_kategorii" required>
                 </div>
-
-                <button type="submit" class="btn btn-primary mt-3">Dodaj kategorie</button>
+                <button type="submit" class="btn btn-primary mt-3">Modyfikuj kategorię</button>
+            </div>
         </form>
 
         <?php
-        require_once '../config.php';
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $nazwa_kategorii = mysqli_real_escape_string($db, $_POST['nazwa_kategorii']);
+            $idkategorii = mysqli_real_escape_string($db, $_POST['id_kategorii']);
 
-
-            $sql = "INSERT INTO kategorie (nazwa_kategorii) 
-                        VALUES ('$nazwa_kategorii')";
+            $sql = "UPDATE kategorie 
+                    SET nazwa_kategorii = '$nazwa_kategorii'
+                    WHERE id_kategorii = $idkategorii";
 
             if (mysqli_query($db, $sql)) {
                 header("Location: " . $_SERVER['PHP_SELF'] . "?success=1");
