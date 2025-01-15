@@ -170,9 +170,9 @@ $result_miasta = mysqli_query($db, $query_miasta);
                 $id_lojalnosciowe . ", '$data_rejestracji')";
 
             if (mysqli_query($db, $sql)) {
-                header("Location: " . $_SERVER['PHP_SELF'] . "?success=1");
+                echo "<div class='alert alert-success'>Klienci zostali zaktualizowani!</div>";
             } else {
-                header("Location: " . $_SERVER['PHP_SELF'] . "?error=" . mysqli_error($db));
+                echo "<div class='alert alert-danger'>Błąd: " . mysqli_error($db) . "</div>";
             }
 
             mysqli_close($db);

@@ -8,7 +8,7 @@ $result_znizki = mysqli_query($db, $query_znizki);
 ?>
 
 <head>
-    <title>Edytuj zniżkę</title>
+    <title>Modyfikuj zniżkę</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <link rel="stylesheet" href="../static/styles/navbar.css">

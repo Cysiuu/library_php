@@ -16,7 +16,7 @@ $result_produkty = mysqli_query($db, $query_produkty);
 ?>
 
 <head>
-    <title>Dodaj opłatę miesięczną</title>
+    <title>Modyfikuj historię cen</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">

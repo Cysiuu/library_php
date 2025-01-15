@@ -2,7 +2,7 @@
 <html lang="pl">
 
 <head>
-    <title>Dodaj miasto</title>
+    <title>Dodaj autora</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
@@ -103,8 +103,7 @@
                         VALUES ('$imie_autora', '$nazwisko_autora')";
 
             if (mysqli_query($db, $sql)) {
-                header("Location: " . $_SERVER['PHP_SELF'] . "?success=1");
-                exit();
+                echo "<div class='alert alert-success'>Autorzy zostali zaktualizowani!</div>";
             } else {
                 echo "<div class='alert alert-danger'>Błąd: " . mysqli_error($db) . "</div>";
             }

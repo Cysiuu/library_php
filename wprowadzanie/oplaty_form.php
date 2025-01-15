@@ -101,8 +101,7 @@
                         VALUES ('$wielkosc_oplaty')";
 
             if (mysqli_query($db, $sql)) {
-                header("Location: " . $_SERVER['PHP_SELF'] . "?success=1");
-                exit();
+                echo "<div class='alert alert-success'>Opłaty zostały zaktualizowane!</div>";
             } else {
                 echo "<div class='alert alert-danger'>Błąd: " . mysqli_error($db) . "</div>";
             }

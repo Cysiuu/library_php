@@ -158,8 +158,7 @@ $result_znizki = mysqli_query($db, $query_znizki);
                                                     ('$id_produktu', $id_znizki, '$ilosc', '$id_statusu', '$data_zamowienia')";
 
             if (mysqli_query($db, $sql)) {
-                header("Location: " . $_SERVER['PHP_SELF'] . "?success=1");
-                exit();
+                echo "<div class='alert alert-success'>Zamóienia zostały zaktualizowane!</div>";
             } else {
                 echo "<div class='alert alert-danger'>Błąd: " . mysqli_error($db) . "</div>";
             }

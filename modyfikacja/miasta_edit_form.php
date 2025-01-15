@@ -7,7 +7,6 @@ if (!$db) {
     die("Błąd połączenia: " . mysqli_connect_error());
 }
 
-// Modified query to get unique cities with their postal codes as a concatenated list
 $query_miasta = "SELECT m.id_miasta, m.miasto, 
                 GROUP_CONCAT(k.kod_pocztowy ORDER BY k.kod_pocztowy SEPARATOR ', ') as kody_pocztowe
                 FROM miasta m 
@@ -17,7 +16,7 @@ $query_miasta = "SELECT m.id_miasta, m.miasto,
 $result_miasta = mysqli_query($db, $query_miasta);
 ?>
 <head>
-    <title>Edytuj miasto</title>
+    <title>Modyfikuj miasto</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
@@ -132,25 +131,21 @@ $result_miasta = mysqli_query($db, $query_miasta);
             $kod_pocztowy = mysqli_real_escape_string($db, $_POST['kod_pocztowy']);
             $miasto = mysqli_real_escape_string($db, $_POST['miasto']);
 
-            // Update city name
             $update_city = "UPDATE miasta SET miasto = '$miasto' WHERE id_miasta = '$id_miasta'";
             if (!mysqli_query($db, $update_city)) {
                 die("Błąd podczas aktualizacji miasta: " . mysqli_error($db));
             }
 
-            // Check if postal code exists for this city
             $check_postal = "SELECT * FROM kody_pocztowe WHERE id_miasta = '$id_miasta'";
             $result_postal = mysqli_query($db, $check_postal);
 
             if (mysqli_num_rows($result_postal) > 0) {
-                // Update existing postal code
                 $update_postal = "UPDATE kody_pocztowe SET kod_pocztowy = '$kod_pocztowy' 
                                     WHERE id_miasta = '$id_miasta'";
                 if (!mysqli_query($db, $update_postal)) {
                     die("Błąd podczas aktualizacji kodu pocztowego: " . mysqli_error($db));
                 }
             } else {
-                // Insert new postal code
                 $insert_postal = "INSERT INTO kody_pocztowe (kod_pocztowy, id_miasta) 
                                     VALUES ('$kod_pocztowy', '$id_miasta')";
                 if (!mysqli_query($db, $insert_postal)) {

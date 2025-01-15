@@ -110,7 +110,7 @@
                     <a href="wyswietlanie_danych.php"><label class="nav-link">Wyswietlanie danych</label></a>
                 </li>
                 <li class="nav-item">
-                    <a href="kasowanie_danych.html"><label class="nav-link">Kasowanie danych</label></a>
+                    <a href="kasowanie_danych.php"><label class="nav-link">Kasowanie danych</label></a>
                 </li>
                 <li class="nav-item">
                     <a href="modyfikowanie_danych.html"><label class="nav-link">Modyfikowanie danych</label></a>

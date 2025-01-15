@@ -113,6 +113,7 @@
                 die("Błąd podczas dodawania kodu pocztowego: " . mysqli_error($db));
             }
 
+
             mysqli_close($db);
 
             header("Location: " . $_SERVER['PHP_SELF'] . "?success=1");

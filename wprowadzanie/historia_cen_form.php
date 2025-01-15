@@ -10,7 +10,7 @@ $result_produkty = mysqli_query($db, $query_produkty);
 ?>
 
 <head>
-    <title>Dodaj opłatę miesięczną</title>
+    <title>Dodaj nową zmianę historii</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
@@ -84,7 +84,7 @@ $result_produkty = mysqli_query($db, $query_produkty);
 
 <div class="container-fluid d-flex align-items-center justify-content-center">
     <div class="container form-container">
-        <h1 class="display-3 mb-4">Dodawanie nowej opłaty</h1>
+        <h1 class="display-3 mb-4">Dodawanie nowej zmiany</h1>
 
 
         <form id="paymentForm" class="pixel-form" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST">
@@ -107,7 +107,7 @@ $result_produkty = mysqli_query($db, $query_produkty);
                     <input type="text" class="form-control" id="zmieniona_cena" name="zmieniona_cena" required>
                 </div>
 
-                <button type="submit" class="btn btn-primary mt-3">Dodaj zmiane</button>
+                <button type="submit" class="btn btn-primary mt-3">Dodaj zmianę</button>
         </form>
 
         <?php
@@ -124,8 +124,7 @@ $result_produkty = mysqli_query($db, $query_produkty);
                         VALUES ('$id_produktu','$zmieniona_cena','$curr_date')";
 
             if (mysqli_query($db, $sql)) {
-                header("Location: " . $_SERVER['PHP_SELF'] . "?success=1");
-                exit();
+                echo "<div class='alert alert-success'>Historia cen została zaktualizowana!</div>";
             } else {
                 echo "<div class='alert alert-danger'>Błąd: " . mysqli_error($db) . "</div>";
             }
