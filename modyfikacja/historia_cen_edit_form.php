@@ -1,12 +1,18 @@
 <!DOCTYPE html>
 <html lang="pl">
 
+
 <?php
 require_once '../config.php';
 
+$query_ceny = "SELECT h.id_historii, h.id_produktu, h.cena, h.data_zmiany 
+              FROM historia_cen h
+              JOIN produkt p ON h.id_produktu = p.idprodukt
+              ORDER BY h.data_zmiany DESC";
+$result_ceny = mysqli_query($db, $query_ceny);
+
 $query_produkty = "SELECT idprodukt FROM produkt";
 $result_produkty = mysqli_query($db, $query_produkty);
-
 ?>
 
 <head>
@@ -84,57 +90,75 @@ $result_produkty = mysqli_query($db, $query_produkty);
 
 <div class="container-fluid d-flex align-items-center justify-content-center">
     <div class="container form-container">
-        <h1 class="display-3 mb-4">Dodawanie nowej opłaty</h1>
+        <h1 class="display-3 mb-4">Modyfikacja historii cen</h1>
 
-
-        <form id="paymentForm" class="pixel-form" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST">
-
-            <div class="form-group">
-                <label for="id_produktu">Id produktu</label>
-                <select class="form-control" id="id_produktu" name="id_produktu" required>
-                    <option value="">Wybierz produkt</option>
-                    <?php while($produkt = mysqli_fetch_assoc($result_produkty)): ?>
-                        <option value="<?php echo $produkt['idprodukt']; ?>">
-                            <?php echo $produkt['idprodukt'] ?>
-                        </option>
-                    <?php endwhile; ?>
-                </select>
-            </div>
-
+        <form id="priceHistoryForm" class="pixel-form" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST">
             <div class="form-section">
                 <div class="form-group">
-                    <label for="zmieniona_cena">Cena</label>
+                    <label for="select_historia">Wybierz historię</label>
+                    <select class="form-control" id="select_historia" name="id_historii" required>
+                        <option value="">Wybierz wpis historii</option>
+                        <?php while ($cena = mysqli_fetch_assoc($result_ceny)): ?>
+                            <option value="<?php echo $cena['id_historii']; ?>">
+                                ID produktu: <?php echo $cena['id_produktu']; ?> -
+                                Cena: <?php echo $cena['cena']; ?> zł -
+                                Data: <?php echo $cena['data_zmiany']; ?>
+                            </option>
+                        <?php endwhile; ?>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_produktu">Nowe ID produktu</label>
+                    <select class="form-control" id="id_produktu" name="id_produktu" required>
+                        <option value="">Wybierz produkt</option>
+                        <?php mysqli_data_seek($result_produkty, 0);
+                        while($produkt = mysqli_fetch_assoc($result_produkty)): ?>
+                            <option value="<?php echo $produkt['idprodukt']; ?>">
+                                <?php echo $produkt['idprodukt']; ?>
+                            </option>
+                        <?php endwhile; ?>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="zmieniona_cena">Nowa cena</label>
                     <input type="text" class="form-control" id="zmieniona_cena" name="zmieniona_cena" required>
                 </div>
 
-                <button type="submit" class="btn btn-primary mt-3">Dodaj zmiane</button>
+                <button type="submit" class="btn btn-primary mt-3">Modyfikuj historię</button>
+            </div>
         </form>
 
         <?php
-        require_once '../config.php';
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
-            $id_produktu = $_POST['id_produktu'];
-            $zmieniona_cena = $_POST['zmieniona_cena'];
+            $id_historii = mysqli_real_escape_string($db, $_POST['id_historii']);
+            $id_produktu = mysqli_real_escape_string($db, $_POST['id_produktu']);
+            $zmieniona_cena = mysqli_real_escape_string($db, $_POST['zmieniona_cena']);
             $curr_date = date("Y-m-d H:i:s");
+
             if(!is_numeric($zmieniona_cena)) {
                 $zmieniona_cena = 0;
             }
 
-            $sql = "INSERT INTO historia_cen (id_produktu,cena,data_zmiany) 
-                        VALUES ('$id_produktu','$zmieniona_cena','$curr_date')";
+            $sql = "UPDATE historia_cen 
+                   SET id_produktu = '$id_produktu',
+                       cena = '$zmieniona_cena',
+                       data_zmiany = '$curr_date'
+                   WHERE id_historii = '$id_historii'";
+
+            echo "<div class='alert alert-info'>Debug: " . $sql . "</div>";
 
             if (mysqli_query($db, $sql)) {
-                header("Location: " . $_SERVER['PHP_SELF'] . "?success=1");
-                exit();
+                echo "<div class='alert alert-success'>Historia została zaktualizowana!</div>";
             } else {
                 echo "<div class='alert alert-danger'>Błąd: " . mysqli_error($db) . "</div>";
             }
-
-            mysqli_close($db);
         }
         ?>
     </div>
 </div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
