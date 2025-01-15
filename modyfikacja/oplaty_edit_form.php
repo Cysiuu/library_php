@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="pl">
 
+<?php
+require_once '../config.php';
+$query_oplaty = "SELECT id_oplaty_miesiecznej, wielkosc_oplaty FROM oplaty_miesieczne ORDER BY wielkosc_oplaty ASC";
+$result_oplaty = mysqli_query($db, $query_oplaty);
+?>
+
 <head>
     <title>Dodaj opłatę miesięczną</title>
 
@@ -76,29 +82,40 @@
 
 <div class="container-fluid d-flex align-items-center justify-content-center">
     <div class="container form-container">
-        <h1 class="display-3 mb-4">Dodawanie nowej opłaty</h1>
-
+        <h1 class="display-3 mb-4">Modyfikacja opłaty miesięcznej</h1>
 
         <form id="paymentForm" class="pixel-form" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST">
             <div class="form-section">
                 <div class="form-group">
-                    <label for="wielkosc_oplaty">Wielkość opłaty</label>
+                    <label for="select_oplata">Wybierz opłatę</label>
+                    <select class="form-control" id="select_oplata" name="id_oplaty" required>
+                        <option value="">Wybierz opłatę</option>
+                        <?php while ($oplata = mysqli_fetch_assoc($result_oplaty)): ?>
+                            <option value="<?php echo $oplata['id_oplaty_miesiecznej']; ?>">
+                                <?php echo $oplata['wielkosc_oplaty']; ?> zł
+                            </option>
+                        <?php endwhile; ?>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="wielkosc_oplaty">Nowa wielkość opłaty</label>
                     <input type="text" class="form-control" id="wielkosc_oplaty" name="wielkosc_oplaty" required>
                 </div>
-                <button type="submit" class="btn btn-primary mt-3">Dodaj opłatę</button>
+                <button type="submit" class="btn btn-primary mt-3">Modyfikuj opłatę</button>
+            </div>
         </form>
 
         <?php
-        require_once '../config.php';
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
-            $wielkosc_oplaty = $_POST['wielkosc_oplaty'];
+            $id_oplaty = mysqli_real_escape_string($db, $_POST['id_oplaty']);
+            $wielkosc_oplaty = mysqli_real_escape_string($db, $_POST['wielkosc_oplaty']);
 
             if(!is_numeric($wielkosc_oplaty)) {
                 $wielkosc_oplaty = 0;
             }
 
-            $sql = "INSERT INTO oplaty_miesieczne (wielkosc_oplaty) 
-                        VALUES ('$wielkosc_oplaty')";
+            $sql = "UPDATE oplaty_miesieczne SET wielkosc_oplaty = '$wielkosc_oplaty' WHERE id_oplaty_miesiecznej = $id_oplaty";
 
             if (mysqli_query($db, $sql)) {
                 header("Location: " . $_SERVER['PHP_SELF'] . "?success=1");
@@ -106,8 +123,6 @@
             } else {
                 echo "<div class='alert alert-danger'>Błąd: " . mysqli_error($db) . "</div>";
             }
-
-            mysqli_close($db);
         }
         ?>
     </div>
