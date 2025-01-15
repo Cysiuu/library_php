@@ -4,7 +4,16 @@
 <?php
 require_once '../config.php';
 
-$query_produkty= "SELECT idprodukt,nazwa_produktu,kod_produktu FROM produkt ORDER BY kod_produktu ASC";
+// Query to get all orders for the dropdown
+$query_zamowienia = "SELECT z.id_zamowienia, p.nazwa_produktu, p.kod_produktu, s.nazwa_statusu, z.ilosc, z.data_zamowienia 
+                     FROM zamowienia z 
+                     JOIN produkt p ON z.id_produktu = p.idprodukt 
+                     JOIN statusy_zamowien s ON z.id_statusu = s.id_statusu 
+                     ORDER BY z.data_zamowienia DESC";
+$result_zamowienia = mysqli_query($db, $query_zamowienia);
+
+// Original queries for dropdowns
+$query_produkty = "SELECT idprodukt,nazwa_produktu,kod_produktu FROM produkt ORDER BY kod_produktu ASC";
 $result_produkty = mysqli_query($db, $query_produkty);
 
 $query_statusy = "SELECT id_statusu,nazwa_statusu FROM statusy_zamowien ORDER BY nazwa_statusu ASC";
@@ -89,17 +98,31 @@ $result_znizki = mysqli_query($db, $query_znizki);
 
 <div class="container-fluid d-flex align-items-center justify-content-center">
     <div class="container form-container">
-        <h1 class="display-3 mb-4">Dodawanie nowego zamówienia</h1>
+        <h1 class="display-3 mb-4">Modyfikacja zamówienia</h1>
 
-
-        <form id="autorForm" class="pixel-form" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST">
+        <form id="zamowienieForm" class="pixel-form" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST">
             <div class="form-section">
+                <div class="form-group">
+                    <label for="select_zamowienie">Wybierz zamówienie</label>
+                    <select class="form-control" id="select_zamowienie" name="id_zamowienia" required>
+                        <option value="">Wybierz zamówienie</option>
+                        <?php while ($zamowienie = mysqli_fetch_assoc($result_zamowienia)): ?>
+                            <option value="<?php echo htmlspecialchars($zamowienie['id_zamowienia']); ?>">
+                                <?php echo htmlspecialchars("Produkt: " . $zamowienie['nazwa_produktu'] .
+                                    " (" . $zamowienie['kod_produktu'] . ") - Status: " .
+                                    $zamowienie['nazwa_statusu'] . " - Ilość: " . $zamowienie['ilosc'] .
+                                    " - Data: " . $zamowienie['data_zamowienia']); ?>
+                            </option>
+                        <?php endwhile; ?>
+                    </select>
+                </div>
 
                 <div class="form-group">
                     <label for="id_produktu">Produkt:</label>
                     <select class="form-control" id="id_produktu" name="id_produktu" required>
                         <option value="">Wybierz produkt</option>
-                        <?php while($produkt = mysqli_fetch_assoc($result_produkty)): ?>
+                        <?php mysqli_data_seek($result_produkty, 0); // Reset the result pointer
+                        while($produkt = mysqli_fetch_assoc($result_produkty)): ?>
                             <option value="<?php echo $produkt['idprodukt']; ?>">
                                 <?php echo $produkt['nazwa_produktu'].' '.$produkt['kod_produktu']; ?>
                             </option>
@@ -111,7 +134,8 @@ $result_znizki = mysqli_query($db, $query_znizki);
                     <label for="id_statusu">Status:</label>
                     <select class="form-control" id="id_statusu" name="id_statusu" required>
                         <option value="">Wybierz status</option>
-                        <?php while($statusy = mysqli_fetch_assoc($result_statusy)): ?>
+                        <?php mysqli_data_seek($result_statusy, 0); // Reset the result pointer
+                        while($statusy = mysqli_fetch_assoc($result_statusy)): ?>
                             <option value="<?php echo $statusy['id_statusu']; ?>">
                                 <?php echo $statusy['nazwa_statusu']; ?>
                             </option>
@@ -123,8 +147,9 @@ $result_znizki = mysqli_query($db, $query_znizki);
                     <label for="id_znizki">Zniżki:</label>
                     <select class="form-control" id="id_znizki" name="id_znizki" required>
                         <option value="">Wybierz zniżkę</option>
-                        <option value="0"> Brak znizki</option>
-                        <?php while($znizki = mysqli_fetch_assoc($result_znizki)): ?>
+                        <option value="0">Brak znizki</option>
+                        <?php mysqli_data_seek($result_znizki, 0); // Reset the result pointer
+                        while($znizki = mysqli_fetch_assoc($result_znizki)): ?>
                             <option value="<?php echo $znizki['id_znizki']; ?>">
                                 <?php echo $znizki['wielkosc_znizki']; ?>
                             </option>
@@ -135,36 +160,34 @@ $result_znizki = mysqli_query($db, $query_znizki);
                 <div class="form-group">
                     <label for="ilosc">Ilość:</label>
                     <input class="form-control" type="number" id="ilosc" name="ilosc" required>
-
                 </div>
 
-                <button type="submit" class="btn btn-primary mt-3">Dodaj nowe zamówienie</button>
+                <button type="submit" class="btn btn-primary mt-3">Modyfikuj zamówienie</button>
+            </div>
         </form>
 
         <?php
-        require_once '../config.php';
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
-            $id_produktu = $_POST['id_produktu'];
-            $id_statusu = $_POST['id_statusu'];
-            $id_znizki = $_POST['id_znizki'];
-            $ilosc = $_POST['ilosc'];
-            $data_zamowienia = date("Y-m-d H:i:s");
+            // Sprawdzamy, czy wszystkie wymagane pola są ustawione
+            if(isset($_POST['id_zamowienia']) && isset($_POST['id_produktu']) && isset($_POST['id_statusu']) && isset($_POST['ilosc'])) {
 
-            if($id_znizki == 0){
-                $id_znizki = "NULL";
+                $id_zamowienia = mysqli_real_escape_string($db, $_POST['id_zamowienia']);
+                $id_produktu = mysqli_real_escape_string($db, $_POST['id_produktu']);
+                $id_statusu = mysqli_real_escape_string($db, $_POST['id_statusu']);
+                $id_znizki = mysqli_real_escape_string($db, $_POST['id_znizki']);
+                $ilosc = mysqli_real_escape_string($db, $_POST['ilosc']);
+
+                // Obsługa zniżki
+                $znizka_sql = ($id_znizki == "0" || empty($id_znizki)) ? "NULL" : "'$id_znizki'";
+
+                // Query do aktualizacji
+                $sql = "UPDATE zamowienia 
+                SET id_produktu = '$id_produktu',
+                    id_znizki = $znizka_sql,
+                    ilosc = '$ilosc',
+                    id_statusu = '$id_statusu'
+                WHERE id_zamowienia = '$id_zamowienia'";
             }
-
-            $sql = "INSERT INTO zamowienia (id_produktu, id_znizki, ilosc, id_statusu, data_zamowienia) VALUES 
-                                                    ('$id_produktu', $id_znizki, '$ilosc', '$id_statusu', '$data_zamowienia')";
-
-            if (mysqli_query($db, $sql)) {
-                header("Location: " . $_SERVER['PHP_SELF'] . "?success=1");
-                exit();
-            } else {
-                echo "<div class='alert alert-danger'>Błąd: " . mysqli_error($db) . "</div>";
-            }
-
-            mysqli_close($db);
         }
         ?>
     </div>
