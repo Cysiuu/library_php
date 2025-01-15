@@ -1,8 +1,17 @@
 <!DOCTYPE html>
 <html lang="pl">
 
+<?php
+
+require_once '../config.php';
+
+$query_autorzy = "SELECT * FROM autorzy";
+$result_autorzy = mysqli_query($db, $query_autorzy);
+
+?>
+
 <head>
-    <title>Dodaj miasto</title>
+    <title>Edytuj autora</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
@@ -11,12 +20,12 @@
     <link rel="stylesheet" href="../static/styles/style.css">
     <link rel="stylesheet" href="../static/styles/pixel-form.css">
     <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap">
+            href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
-        rel="stylesheet">
+            href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
+            rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
 </head>
@@ -76,10 +85,25 @@
 
 <div class="container-fluid d-flex align-items-center justify-content-center">
     <div class="container form-container">
-        <h1 class="display-3 mb-4">Dodawanie nowego autora</h1>
+        <h1 class="display-3 mb-4">Modyfikacja autora</h1>
 
 
         <form id="autorForm" class="pixel-form" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST">
+
+            <div class="form-section">
+                <div class="form-group">
+                    <label for="imie_autora">Imie autora</label>
+                    <select class="form-control" id="select_autor" name="idautora" required>
+                        <option value="">Wybierz autora</option>
+                        <?php while ($autor = mysqli_fetch_assoc($result_autorzy)): ?>
+                            <option value="<?php echo htmlspecialchars($autor['idautora']); ?>">
+                                <?php echo htmlspecialchars($autor['imie'] . ' - ' . $autor['nazwisko']); ?>
+                            </option>
+                        <?php endwhile; ?>
+                    </select>
+                </div>
+            </div>
+
             <div class="form-section">
                 <div class="form-group">
                     <label for="imie_autora">Imie autora</label>
@@ -89,7 +113,7 @@
                     <label for="imie_autora">Nazwisko autora</label>
                     <input type="text" class="form-control" id="nazwisko_autora" name="nazwisko_autora" required>
                 </div>
-            <button type="submit" class="btn btn-primary mt-3">Dodaj autora</button>
+                <button type="submit" class="btn btn-primary mt-3">Modyfikuj autora</button>
         </form>
 
         <?php
@@ -97,10 +121,12 @@
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $imie_autora = mysqli_real_escape_string($db, $_POST['imie_autora']);
             $nazwisko_autora = mysqli_real_escape_string($db, $_POST['nazwisko_autora']);
+            $idautora = mysqli_real_escape_string($db, $_POST['idautora']);
 
-
-            $sql = "INSERT INTO autorzy (imie, nazwisko) 
-                        VALUES ('$imie_autora', '$nazwisko_autora')";
+            $sql = "UPDATE autorzy 
+            SET imie = '$imie_autora', 
+                nazwisko = '$nazwisko_autora'
+            WHERE idautora = $idautora";
 
             if (mysqli_query($db, $sql)) {
                 header("Location: " . $_SERVER['PHP_SELF'] . "?success=1");
